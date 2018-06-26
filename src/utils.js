@@ -2,9 +2,9 @@ import { printSchema, GraphQLSchema, GraphQLObjectType } from 'graphql';
 
 /**
  * Return a schema string with a Main type using the fields
- * 
- * @param {*array} fields 
- * 
+ *
+ * @param {*array} fields
+ *
  * @example
  * printSchemaForFields({
  *     id: { type: graphql.GraphQLString },

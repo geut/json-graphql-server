@@ -126,7 +126,7 @@ type PostFilter {
     views_lte: Int
     views_gt: Int
     views_gte: Int
-    user_id: ID    
+    user_id: ID
 }
 type ListMetadata {
     count: Int!
@@ -172,7 +172,7 @@ Here is how you can use the queries and mutations generated for your data, using
         "title": "Lorem Ipsum",
         "views": 254,
         "user_id": 123
-    } 
+    }
   }
 }
             </pre>
@@ -201,7 +201,7 @@ Here is how you can use the queries and mutations generated for your data, using
         "User": {
             "name": "John Doe"
         }
-    } 
+    }
   }
 }
             </pre>
@@ -231,7 +231,7 @@ Here is how you can use the queries and mutations generated for your data, using
             { "body": "Consectetur adipiscing elit" },
             { "body": "Nam molestie pellentesque dui" },
         ]
-    } 
+    }
   }
 }
             </pre>
@@ -409,113 +409,13 @@ app.use('/graphql', jsonGraphqlExpress(data));
 app.listen(PORT);
 ```
 
-## Usage in browser with XMLHttpRequest
-
-Useful when using XMLHttpRequest directly or libaries such as [axios](https://www.npmjs.com/package/axios).
-
-### Install with a script tag
-
-Add a `script` tag referencing the library:
-
-```html
-<script src="../lib/json-graphql-server.min.js"></script>
-```
-
-It will expose the `JsonGraphqlServer` as a global object:
-
-```html
-<script type="text/javascript">
-    window.addEventListener('load', function() {
-        const data = [...];
-
-        const server = JsonGraphqlServer({
-            data,
-            url: 'http://localhost:3000/graphql'
-        });
-
-        server.start();
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:3000/graphql', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.onerror = function(error) {
-            console.error(error);
-        }
-        xhr.onload = function() {
-            const result = JSON.parse(xhr.responseText);
-            console.log('data returned:', result);
-            alert('Found ' + result.data.allPosts.length + ' posts');
-        }
-        const body = JSON.stringify({ query: 'query allPosts { allPosts { id } }' });
-        xhr.send(body);
-    });
-</script>
-```
-
-### Use with a bundler (webpack)
-
-```sh
-npm install json-graphql-server
-```
-
-```js
-import JsonGraphqlServer from 'json-graphql-server';
-
-const data = [...];
-
-const server = JsonGraphqlServer({
-    data,
-    url: 'http://localhost:3000/graphql'
-});
-
-server.start();
-
-const xhr = new XMLHttpRequest();
-xhr.open('POST', 'http://localhost:3000/graphql', true);
-xhr.setRequestHeader('Content-Type', 'application/json');
-xhr.setRequestHeader('Accept', 'application/json');
-xhr.onerror = function(error) {
-    console.error(error);
-}
-xhr.onload = function() {
-    const result = JSON.parse(xhr.responseText);
-    console.log('data returned:', result);
-    alert('Found ' + result.data.allPosts.length + ' posts');
-}
-const body = JSON.stringify({ query: 'query allPosts { allPosts { id } }' });
-xhr.send(body);
-```
-
-## Usage in browser with fetch
-
-```js
-import fetchMock from 'fetch-mock';
-import JsonGraphqlServer from 'json-graphql-server';
-
-const data = [...];
-const server = JsonGraphqlServer({ data });
-
-fetchMock.post('http://localhost:3000/graphql', server.getHandler());
-
-fetch({
-    url: 'http://localhost:3000/graphql',
-    method: 'POST',
-    body: JSON.stringify({ query: 'query allPosts { allPosts { id } }' })
-})
-.then(response => response.json())
-.then(json => {
-    alert('Found ' + result.data.allPosts.length + ' posts');
-})
-```
-
 ## Adding Authentication, Custom Routes, etc.
 
 `json-graphql-server` doesn't deal with authentication or custom routes. But you can use your favorite middleware with Express:
 
 ```js
-import express from 'express';
-import { jsonGraphqlExpress } from 'json-graphql-server';
+const express = require('express');
+const jsonGraphqlExpress = require('json-graphql-server').default;
 
 import OAuthSecurityMiddleWare from './path/to/OAuthSecurityMiddleWare';
 
@@ -525,32 +425,10 @@ const data = {
     // ... your data
 };
 app.use(OAuthSecurityMiddleWare());
-app.use('/graphql', jsonGraphqlExpress(data));
+app.use('/graphql', jsonGraphqlExpress({ data, /* typeDefs, resolvers */ }));
 app.listen(PORT);
-```
-
-## Deployment
-
-Deploy with Heroku or Next.js.
-
-## Roadmap
-
-* CLI options (https, watch, delay, custom schema)
-* Subscriptions
-* Client-side mocking (à la [FakeRest](https://github.com/marmelab/FakeRest))
-
-## Contributing
-
-Use Prettier formatting and make sure you include unit tests. The project includes a `Makefile` to automate usual developer tasks:
-
-```sh
-make install
-make build
-make test
-make watch
-make format
 ```
 
 ## License
 
-Admin-on-rest is licensed under the [MIT Licence](https://github.com/marmelab/json-graphql-server/blob/master/LICENSE.md), sponsored and supported by [marmelab](http://marmelab.com).
+Licensed under the [MIT Licence](https://github.com/geut/json-graphql-server/blob/master/LICENSE.md).

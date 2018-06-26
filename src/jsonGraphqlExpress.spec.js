@@ -35,7 +35,7 @@ let agent;
 
 beforeAll(() => {
     const app = express();
-    app.use('/', jsonGraphqlExpress(data));
+    app.use('/', jsonGraphqlExpress({ data }));
     agent = request.agent(app);
 });
 

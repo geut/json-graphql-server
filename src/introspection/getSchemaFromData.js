@@ -19,7 +19,7 @@ import { getRelatedType } from '../nameConverter';
 
 /**
  * Get a GraphQL schema from data
- * 
+ *
  * @example
  * const data = {
  *    "posts": [
@@ -76,7 +76,7 @@ import { getRelatedType } from '../nameConverter';
  * //     removeUser(id: ID!): Boolean
  * // }
  */
-export default data => {
+export default (data, userSchemaExtension) => {
     const types = getTypesFromData(data);
     const typesByName = types.reduce((types, type) => {
         types[type.name] = type;
@@ -157,14 +157,14 @@ export default data => {
         }, {}),
     });
 
-    const schema = new GraphQLSchema({
+    let schema = new GraphQLSchema({
         query: queryType,
         mutation: mutationType,
     });
 
     /**
      * extend schema to add relationship fields
-     * 
+     *
      * @example
      * If the `post` key contains a 'user_id' field, then
      * add one-to-many and many-to-one type extensions:
@@ -184,7 +184,13 @@ extend type ${relType} { ${rel}: [${type}] }`;
         return ext;
     }, '');
 
-    return schemaExtension
-        ? extendSchema(schema, parse(schemaExtension))
-        : schema;
+    if (schemaExtension) {
+        schema = extendSchema(schema, parse(schemaExtension));
+    }
+
+    if (userSchemaExtension) {
+        schema = extendSchema(schema, parse(userSchemaExtension));
+    }
+
+    return schema;
 };

@@ -3,7 +3,9 @@ import schemaBuilder from './schemaBuilder';
 
 test('plugs resolvers with schema', () => {
     const schema = schemaBuilder({
-        posts: [{ id: 0, title: 'hello', foo: 'bar' }],
+        data: {
+            posts: [{ id: 0, title: 'hello', foo: 'bar' }],
+        },
     });
     return graphql(schema, 'query { Post(id: 0) { id title } }').then(result =>
         expect(result).toEqual({
@@ -41,7 +43,7 @@ const data = {
     ],
 };
 
-const schema = schemaBuilder(data);
+const schema = schemaBuilder({ data });
 
 test('all* route returns all entities by default', () =>
     graphql(schema, '{ allPosts { id } }').then(result =>

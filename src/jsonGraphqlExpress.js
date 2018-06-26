@@ -45,8 +45,8 @@ import schemaBuilder from './schemaBuilder';
  *
  * app.listen(PORT);
  */
-export default data =>
+export default opts =>
     graphqlHTTP({
-        schema: schemaBuilder(data),
+        schema: schemaBuilder(opts),
         graphiql: true,
     });
