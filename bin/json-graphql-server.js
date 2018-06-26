@@ -4,7 +4,6 @@ var path = require('path');
 var express = require('express');
 var cors = require('cors');
 var JsonGraphqlServer = require('../index.js').default;
-
 var dataFilePath = process.argv.length > 2 ? process.argv[2] : './data.json';
 var data = require(path.join(process.cwd(), dataFilePath));
 var PORT = process.env.NODE_PORT || 3000;

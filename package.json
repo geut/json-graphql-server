@@ -9,7 +9,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "example": "node bin/json-graphql-server.js example/db.js",
+    "example": "bin/json-graphql-server.js example/db.js",
     "lint:fix": "eslint --fix --ignore-path .gitignore **/*.js",
     "precommit": "lint-staged",
     "test": "jest"
