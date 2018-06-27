@@ -45,8 +45,14 @@ const schemaBuilder = require('./schemaBuilder');
  *
  * app.listen(PORT);
  */
-module.exports = opts =>
-  graphqlHTTP({
-    schema: schemaBuilder(opts),
-    graphiql: true
-  });
+module.exports = (schema, opts = {}) =>
+  graphqlHTTP(
+    Object.assign(
+      {},
+      {
+        schema: schemaBuilder(schema),
+        graphiql: true
+      },
+      opts
+    )
+  );
