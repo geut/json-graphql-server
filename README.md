@@ -397,8 +397,8 @@ npm install --save-dev json-graphql-server
 Then use the `jsonGraphqlExpress` express middleware:
 
 ```js
-import express from 'express';
-import { jsonGraphqlExpress } from 'json-graphql-server';
+const express = require('express');
+const jsonGraphqlExpress = require('json-graphql-server');
 
 const PORT = 3000;
 const app = express();
@@ -415,7 +415,7 @@ app.listen(PORT);
 
 ```js
 const express = require('express');
-const jsonGraphqlExpress = require('json-graphql-server').default;
+const jsonGraphqlExpress = require('json-graphql-server');
 
 import OAuthSecurityMiddleWare from './path/to/OAuthSecurityMiddleWare';
 

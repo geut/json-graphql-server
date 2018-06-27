@@ -1,5 +1,5 @@
-import graphqlHTTP from 'express-graphql';
-import schemaBuilder from './schemaBuilder';
+const graphqlHTTP = require('express-graphql');
+const schemaBuilder = require('./schemaBuilder');
 
 /**
  * An express middleware for a GraphQL endpoint serving data from the supplied json.
@@ -45,8 +45,8 @@ import schemaBuilder from './schemaBuilder';
  *
  * app.listen(PORT);
  */
-export default opts =>
-    graphqlHTTP({
-        schema: schemaBuilder(opts),
-        graphiql: true,
-    });
+module.exports = opts =>
+  graphqlHTTP({
+    schema: schemaBuilder(opts),
+    graphiql: true
+  });

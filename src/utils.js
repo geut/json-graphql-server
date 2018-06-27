@@ -1,4 +1,4 @@
-import { printSchema, GraphQLSchema, GraphQLObjectType } from 'graphql';
+const { printSchema, GraphQLSchema, GraphQLObjectType } = require('graphql');
 
 /**
  * Return a schema string with a Main type using the fields
@@ -23,36 +23,36 @@ import { printSchema, GraphQLSchema, GraphQLObjectType } from 'graphql';
  * //   foo: Main
  * // }
  */
-export const printSchemaForFields = fields => {
-    const mainType = new GraphQLObjectType({
-        name: 'Main',
-        fields,
-    });
+exports.printSchemaForFields = fields => {
+  const mainType = new GraphQLObjectType({
+    name: 'Main',
+    fields
+  });
 
-    const queryType = new GraphQLObjectType({
-        name: 'Query',
-        fields: {
-            foo: { type: mainType },
-        },
-    });
+  const queryType = new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      foo: { type: mainType }
+    }
+  });
 
-    const schema = new GraphQLSchema({ query: queryType });
-    return printSchema(schema);
+  const schema = new GraphQLSchema({ query: queryType });
+  return printSchema(schema);
 };
 
-export const printSchemaForTypes = types => {
-    const typesSchema = types.reduce((schema, type) => {
-        schema[type.name] = type;
-        return schema;
-    }, {});
-    const queryType = new GraphQLObjectType({
-        name: 'Query',
-        fields: types.reduce((fields, type) => {
-            fields[type.name] = { type };
-            return fields;
-        }, {}),
-    });
+exports.printSchemaForTypes = types => {
+  const typesSchema = types.reduce((schema, type) => {
+    schema[type.name] = type;
+    return schema;
+  }, {});
+  const queryType = new GraphQLObjectType({
+    name: 'Query',
+    fields: types.reduce((fields, type) => {
+      fields[type.name] = { type };
+      return fields;
+    }, {})
+  });
 
-    const schema = new GraphQLSchema({ ...typesSchema, query: queryType });
-    return printSchema(schema);
+  const schema = new GraphQLSchema({ ...typesSchema, query: queryType });
+  return printSchema(schema);
 };

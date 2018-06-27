@@ -1,4 +1,4 @@
-import { camelize, pluralize, singularize } from 'inflection';
+const { camelize, pluralize, singularize } = require('inflection');
 
 /**
  * A bit of vocabulary
@@ -26,34 +26,42 @@ import { camelize, pluralize, singularize } from 'inflection';
  * @param {String} fieldName 'users'
  * @return {String} 'Users'
  */
-export const getRelationshipFromKey = key => camelize(key);
+const getRelationshipFromKey = key => camelize(key);
 
 /**
  *
  * @param {String} fieldName 'users'
  * @return {String} 'User'
  */
-export const getTypeFromKey = key => camelize(singularize(key));
+const getTypeFromKey = key => camelize(singularize(key));
 
 /**
  *
  * @param {String} fieldName 'user_id'
  * @return {String} 'users'
  */
-export const getRelatedKey = fieldName =>
-    pluralize(fieldName.substr(0, fieldName.length - 3));
+const getRelatedKey = fieldName =>
+  pluralize(fieldName.substr(0, fieldName.length - 3));
 
 /**
  *
  * @param {String} key 'users'
  * @return {String} 'user_id'
  */
-export const getReverseRelatedField = key => `${singularize(key)}_id`;
+const getReverseRelatedField = key => `${singularize(key)}_id`;
 
 /**
  *
  * @param {String} fieldName 'user_id'
  * @return {String} 'User'
  */
-export const getRelatedType = fieldName =>
-    getTypeFromKey(fieldName.substr(0, fieldName.length - 3));
+const getRelatedType = fieldName =>
+  getTypeFromKey(fieldName.substr(0, fieldName.length - 3));
+
+module.exports = {
+  getRelationshipFromKey,
+  getTypeFromKey,
+  getRelatedKey,
+  getReverseRelatedField,
+  getRelatedType
+};

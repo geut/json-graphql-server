@@ -1,12 +1,12 @@
-import { GraphQLObjectType } from 'graphql';
-import { singularize, camelize } from 'inflection';
+const { GraphQLObjectType } = require('graphql');
+const { singularize, camelize } = require('inflection');
 
-import getFieldsFromEntities from './getFieldsFromEntities';
-import { getTypeFromKey } from '../nameConverter';
+const getFieldsFromEntities = require('./getFieldsFromEntities');
+const { getTypeFromKey } = require('../nameConverter');
 
 /**
  * Get a list of GraphQLObjectType from data
- * 
+ *
  * @example
  * const data = {
  *    "posts": [
@@ -54,13 +54,12 @@ import { getTypeFromKey } from '../nameConverter';
  * //     }),
  * // ]
  */
-export default data =>
-    Object.keys(data)
-        .map(typeName => ({
-            name: camelize(singularize(typeName)),
-            fields: getFieldsFromEntities(data[typeName]),
-        }))
-        .map(typeObject => new GraphQLObjectType(typeObject));
+module.exports = data =>
+  Object.keys(data)
+    .map(typeName => ({
+      name: camelize(singularize(typeName)),
+      fields: getFieldsFromEntities(data[typeName])
+    }))
+    .map(typeObject => new GraphQLObjectType(typeObject));
 
-export const getTypeNamesFromData = data =>
-    Object.keys(data).map(getTypeFromKey);
+exports.getTypeNamesFromData = data => Object.keys(data).map(getTypeFromKey);

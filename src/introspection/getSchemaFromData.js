@@ -1,21 +1,21 @@
-import {
-    GraphQLBoolean,
-    GraphQLID,
-    GraphQLInt,
-    GraphQLList,
-    GraphQLNonNull,
-    GraphQLObjectType,
-    GraphQLSchema,
-    GraphQLString,
-    parse,
-    extendSchema,
-} from 'graphql';
-import { pluralize, camelize } from 'inflection';
+const {
+  GraphQLBoolean,
+  GraphQLID,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+  parse,
+  extendSchema
+} = require('graphql');
+const { pluralize, camelize } = require('inflection');
 
-import getTypesFromData from './getTypesFromData';
-import getFilterTypesFromData from './getFilterTypesFromData';
-import { isRelationshipField } from '../relationships';
-import { getRelatedType } from '../nameConverter';
+const getTypesFromData = require('./getTypesFromData');
+const getFilterTypesFromData = require('./getFilterTypesFromData');
+const { isRelationshipField } = require('../relationships');
+const { getRelatedType } = require('../nameConverter');
 
 /**
  * Get a GraphQL schema from data
@@ -76,121 +76,122 @@ import { getRelatedType } from '../nameConverter';
  * //     removeUser(id: ID!): Boolean
  * // }
  */
-export default (data, userSchemaExtension) => {
-    const types = getTypesFromData(data);
-    const typesByName = types.reduce((types, type) => {
-        types[type.name] = type;
-        return types;
-    }, {});
+module.exports = (data, userSchemaExtension) => {
+  const types = getTypesFromData(data);
+  const typesByName = types.reduce((types, type) => {
+    types[type.name] = type;
+    return types;
+  }, {});
 
-    const filterTypesByName = getFilterTypesFromData(data);
+  const filterTypesByName = getFilterTypesFromData(data);
 
-    const listMetadataType = new GraphQLObjectType({
-        name: 'ListMetadata',
-        fields: {
-            count: { type: GraphQLInt },
+  const listMetadataType = new GraphQLObjectType({
+    name: 'ListMetadata',
+    fields: {
+      count: { type: GraphQLInt }
+    }
+  });
+
+  const queryType = new GraphQLObjectType({
+    name: 'Query',
+    fields: types.reduce((fields, type) => {
+      fields[type.name] = {
+        type: typesByName[type.name],
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLID) }
+        }
+      };
+      fields[`all${camelize(pluralize(type.name))}`] = {
+        type: new GraphQLList(typesByName[type.name]),
+        args: {
+          page: { type: GraphQLInt },
+          perPage: { type: GraphQLInt },
+          sortField: { type: GraphQLString },
+          sortOrder: { type: GraphQLString },
+          filter: { type: filterTypesByName[type.name] }
+        }
+      };
+      fields[`_all${camelize(pluralize(type.name))}Meta`] = {
+        type: listMetadataType,
+        args: {
+          page: { type: GraphQLInt },
+          perPage: { type: GraphQLInt },
+          filter: { type: filterTypesByName[type.name] }
+        }
+      };
+      return fields;
+    }, {})
+  });
+
+  const mutationType = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: types.reduce((fields, type) => {
+      const typeFields = typesByName[type.name].getFields();
+      const nullableTypeFields = Object.keys(typeFields).reduce(
+        (f, fieldName) => {
+          f[fieldName] = Object.assign({}, typeFields[fieldName], {
+            type:
+              fieldName !== 'id' &&
+              typeFields[fieldName].type instanceof GraphQLNonNull
+                ? typeFields[fieldName].type.ofType
+                : typeFields[fieldName].type
+          });
+          return f;
         },
-    });
+        {}
+      );
+      fields[`create${type.name}`] = {
+        type: typesByName[type.name],
+        args: typeFields
+      };
+      fields[`update${type.name}`] = {
+        type: typesByName[type.name],
+        args: nullableTypeFields
+      };
+      fields[`remove${type.name}`] = {
+        type: GraphQLBoolean,
+        args: {
+          id: { type: new GraphQLNonNull(GraphQLID) }
+        }
+      };
+      return fields;
+    }, {})
+  });
 
-    const queryType = new GraphQLObjectType({
-        name: 'Query',
-        fields: types.reduce((fields, type) => {
-            fields[type.name] = {
-                type: typesByName[type.name],
-                args: {
-                    id: { type: new GraphQLNonNull(GraphQLID) },
-                },
-            };
-            fields[`all${camelize(pluralize(type.name))}`] = {
-                type: new GraphQLList(typesByName[type.name]),
-                args: {
-                    page: { type: GraphQLInt },
-                    perPage: { type: GraphQLInt },
-                    sortField: { type: GraphQLString },
-                    sortOrder: { type: GraphQLString },
-                    filter: { type: filterTypesByName[type.name] },
-                },
-            };
-            fields[`_all${camelize(pluralize(type.name))}Meta`] = {
-                type: listMetadataType,
-                args: {
-                    page: { type: GraphQLInt },
-                    perPage: { type: GraphQLInt },
-                    filter: { type: filterTypesByName[type.name] },
-                },
-            };
-            return fields;
-        }, {}),
-    });
+  let schema = new GraphQLSchema({
+    query: queryType,
+    mutation: mutationType
+  });
 
-    const mutationType = new GraphQLObjectType({
-        name: 'Mutation',
-        fields: types.reduce((fields, type) => {
-            const typeFields = typesByName[type.name].getFields();
-            const nullableTypeFields = Object.keys(
-                typeFields
-            ).reduce((f, fieldName) => {
-                f[fieldName] = Object.assign({}, typeFields[fieldName], {
-                    type:
-                        fieldName !== 'id' &&
-                        typeFields[fieldName].type instanceof GraphQLNonNull
-                            ? typeFields[fieldName].type.ofType
-                            : typeFields[fieldName].type,
-                });
-                return f;
-            }, {});
-            fields[`create${type.name}`] = {
-                type: typesByName[type.name],
-                args: typeFields,
-            };
-            fields[`update${type.name}`] = {
-                type: typesByName[type.name],
-                args: nullableTypeFields,
-            };
-            fields[`remove${type.name}`] = {
-                type: GraphQLBoolean,
-                args: {
-                    id: { type: new GraphQLNonNull(GraphQLID) },
-                },
-            };
-            return fields;
-        }, {}),
-    });
-
-    let schema = new GraphQLSchema({
-        query: queryType,
-        mutation: mutationType,
-    });
-
-    /**
-     * extend schema to add relationship fields
-     *
-     * @example
-     * If the `post` key contains a 'user_id' field, then
-     * add one-to-many and many-to-one type extensions:
-     *     extend type Post { User: User }
-     *     extend type User { Posts: [Post] }
-     */
-    const schemaExtension = Object.values(typesByName).reduce((ext, type) => {
-        Object.keys(type.getFields())
-            .filter(isRelationshipField)
-            .map(fieldName => {
-                const relType = getRelatedType(fieldName);
-                const rel = pluralize(type.toString());
-                ext += `
+  /**
+   * extend schema to add relationship fields
+   *
+   * @example
+   * If the `post` key contains a 'user_id' field, then
+   * add one-to-many and many-to-one type extensions:
+   *     extend type Post { User: User }
+   *     extend type User { Posts: [Post] }
+   */
+  const schemaExtension = Object.values(typesByName).reduce((ext, type) => {
+    Object.keys(type.getFields())
+      .filter(isRelationshipField)
+      .map(fieldName => {
+        const relType = getRelatedType(fieldName);
+        const rel = pluralize(type.toString());
+        ext += `
 extend type ${type} { ${relType}: ${relType} }
 extend type ${relType} { ${rel}: [${type}] }`;
-            });
-        return ext;
-    }, '');
+      });
+    return ext;
+  }, '');
 
-    if (schemaExtension) {
-        schema = extendSchema(schema, parse(schemaExtension));
-    }
+  if (schemaExtension) {
+    schema = extendSchema(schema, parse(schemaExtension));
+  }
 
-    if (userSchemaExtension) {
-        schema = extendSchema(schema, parse(userSchemaExtension));
-    }
+  if (userSchemaExtension) {
+    schema = extendSchema(schema, parse(userSchemaExtension));
+  }
 
-    return schema;
+  return schema;
 };

@@ -1,7 +1,7 @@
-import applyFilters from './applyFilters';
+const applyFilters = require('./applyFilters');
 
-export default entityData => (_, { filter = {} }) => {
-    let items = applyFilters(entityData, filter);
+module.exports = entityData => (_, { filter = {} }) => {
+  let items = applyFilters(entityData, filter);
 
-    return { count: items.length };
+  return { count: items.length };
 };

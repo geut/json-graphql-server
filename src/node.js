@@ -1,3 +1,3 @@
-import jsonGraphqlExpress from './jsonGraphqlExpress';
+const jsonGraphqlExpress = require('./jsonGraphqlExpress');
 
-export default jsonGraphqlExpress;
+module.exports = jsonGraphqlExpress;
